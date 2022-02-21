@@ -8,14 +8,20 @@
 #include "sorts/merge_sort.h"
 #include "sorts/heap_sort.h"
 
-#define ARR_SIZE 1000000
+#define TIMES 5
+
 #define N_SIZES 4
 int arr_sizes[] = { 50000, 100000, 500000, 1000000 };
+
+#define ARR_SIZE 1000000
 int arr[ARR_SIZE];
-double results[N_SIZES];
+
+double results[N_SIZES][TIMES];
 
 void generate_arr();
 void print_arr();
+double average(double * arr, int size);
+void save_results(char * sort_name);
 void benchmark_sort();
 bool is_sorted();
 
@@ -37,7 +43,7 @@ main(void)
     benchmark_sort("Merge Sort", merge_sort);
     benchmark_sort("Heap Sort", heap_sort);
 
-    return 0;
+    return (EXIT_SUCCESS);
 }
 
 void
@@ -56,36 +62,51 @@ print_arr(int size)
 }
 
 void
+benchmark_sort(char * sort_name, void sort())
+{
+    for (int i = 0; i < N_SIZES; ++i) {
+        for (int experiment = 0; experiment < TIMES; ++experiment) {
+            int size = arr_sizes[i];
+            generate_arr(size);
+
+            clock_t begin = clock();
+            sort(arr, size);
+            clock_t end = clock();
+
+            double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
+            results[i][experiment] = time_spent;
+
+            if (!is_sorted(arr_sizes[i])) {
+                printf("🚫 %s failed: Array was not sorted\n", sort_name);
+                exit (EXIT_FAILURE);
+            }
+        }
+    }
+
+    save_results(sort_name);
+}
+
+void
 save_results(char * sort_name)
 {
     FILE * out_file = fopen("results.csv", "a");
 
     fprintf(out_file, "%s", sort_name);
     for (int i = 0; i < N_SIZES; ++i)
-        fprintf(out_file, ",%f", results[i]);
+        fprintf(out_file, ",%f", average(results[i], TIMES));
     fprintf(out_file, "\n");
 
     fclose(out_file);
 }
 
-void
-benchmark_sort(char * sort_name, void sort())
+double
+average(double * arr, int size)
 {
-    for (int experiment = 0; experiment < N_SIZES; ++experiment) {
-        int size = arr_sizes[experiment];
-        generate_arr(size);
+    double sum = 0;
+    for (int i = 0; i < size; ++i)
+        sum += arr[i];
 
-        clock_t begin = clock();
-        sort(arr, size);
-        clock_t end = clock();
-
-        double time_spent = (double) (end - begin) / CLOCKS_PER_SEC;
-        results[experiment] = time_spent;
-
-        assert(is_sorted(arr_sizes[experiment]) && "🚫 Array was not sorted");
-    }
-
-    save_results(sort_name);
+    return (sum / size);
 }
 
 bool
