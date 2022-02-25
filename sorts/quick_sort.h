@@ -4,26 +4,30 @@
 #include "common.h"
 
 void
-quick_sort_internal(int * arr, int l, int r)
+quick_sort_internal(int * arr, int left_bound, int right_bound)
 {
-    int i = l, j = r;
-    int pivot = arr[r];
-    while (i <= j) {
-        while (arr[i] < pivot)
-            ++i;
-        while (arr[j] > pivot)
-            --j;
-        if (i <= j) {
-            swap(&arr[i], &arr[j]);
-            --j;
-            ++i;
-        }
-    }
+    if (left_bound >= right_bound)
+        return;
 
-    if (l < j)
-        quick_sort_internal(arr, l, j);
-    if (i < r)
-        quick_sort_internal(arr, i, r);
+    // Pick a pivot
+    int pivot = arr[right_bound];
+
+    // Partition based on pivot
+    int left = left_bound;
+    int right = right_bound;
+    while (left < right) {
+        while (arr[left] <= pivot && left < right)
+            ++left;
+        while (arr[right] >= pivot && left < right)
+            --right;
+
+        swap(&arr[left], &arr[right]);
+    }
+    swap(&arr[left], &arr[right_bound]);
+
+    // Sort left and right halves
+    quick_sort_internal(arr, left_bound, left - 1);
+    quick_sort_internal(arr, right + 1, right_bound);
 }
 
 void

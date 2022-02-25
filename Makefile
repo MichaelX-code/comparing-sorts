@@ -1,38 +1,49 @@
 CC = gcc
 CFLAGS = -Wall -Wextra
 
-all: plot									## do everything nicely
+PY=python3
+
+TARGET=benchmark
+
+CSV=results.csv
+RESGRAPH=graph.png
+RESTABLE=table.png
+RESDIR=results
+
+all: run plot								## do everything nicely (*)
 	@printf "[INFO] Moving results into separate directory\n"
 	@printf "[CMD] "
-	mkdir -p results
+	mkdir -p $(RESDIR)
 	@printf "[CMD] "
-	mv graph.png table.png results.csv results
+	mv $(RESGRAPH) $(RESTABLE) $(RESDIR)
 
-build: benchmark.c							## build C executable
-	@printf "[INFO] Compiling C code\n"
+build: benchmark.c							## build benchmark
+	@printf "[INFO] Compiling benchmark\n"
 	@printf "[CMD] "
-	$(CC) $(CFLAGS) -o benchmark $^ 
+	$(CC) $(CFLAGS) -o $(TARGET) $^ 
 
-run: build									## run C executable
-	@printf "[INFO] Running C code\n"
+run: build									## build & run benchmark
+	@printf "[INFO] Running benchmark\n"
 	@printf "[CMD] "
-	./benchmark
+	./$(TARGET)
 
-plot: run									## generate a plot from results
+plot: results.csv							## generate a plot from results.csv
 	@printf "[INFO] Generating results\n"
 	@printf "[CMD] "
-	python3 plot.py
+	$(PY) plot.py
+	@printf "[CMD] "
+	rm -f $(CSV)
 
-clean:										## clean C executables & results
+clean:										## clean everything
 	@printf "[INFO] Cleaning executables\n"
 	@printf "[CMD] "
-	rm -f benchmark
+	rm -f $(TARGET)
 	@printf "[INFO] Cleaning results\n"
 	@printf "[CMD] "
-	rm -rf results.csv graph.png table.png results/
+	rm -rf $(CSV) $(RESGRAPH) $(RESTABLE) $(RESDIR)
 
 help:										## print this help msg
 	@printf "Usage:\n\tmake <command>\n\n"
 	@printf "Commands:\n"
 	@egrep -h '\s##\s' $(MAKEFILE_LIST) \
-		| awk 'BEGIN {FS = ":.*?## "}; {printf "\t%-20s%s\n", $$1, $$2}'
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "\t%-10s%s\n", $$1, $$2}'

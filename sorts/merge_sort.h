@@ -4,61 +4,58 @@
 #include "common.h"
 
 void
-merge(int * arr, int p, int q, int r)
+merge(int * arr, int left_bound, int mid, int right_bound)
 {
-    int n1 = q - p + 1;
-    int n2 = r - q;
-    int L[n1], M[n2];
+    // Create 2 arrays (left and right halves)
+    int left_size = mid - left_bound + 1;
+    int right_size = right_bound - mid;
+    int left_half[left_size], right_half[right_size];
+    for (int i = 0; i < left_size; ++i)
+        left_half[i] = arr[left_bound + i];
+    for (int j = 0; j < right_size; ++j)
+        right_half[j] = arr[mid + 1 + j];
 
-    for (int i = 0; i < n1; i++)
-        L[i] = arr[p + i];
-    for (int j = 0; j < n2; j++)
-        M[j] = arr[q + 1 + j];
-
-    int i, j, k;
-    i = 0;
-    j = 0;
-    k = p;
-
-    while (i < n1 && j < n2) {
-        if (L[i] <= M[j]) {
-            arr[k] = L[i];
-            i++;
+    // Merge two halves
+    int i = 0, j = 0, k = left_bound;
+    for (; i < left_size && j < right_size; ++k) {
+        if (left_half[i] <= right_half[j]) {
+            arr[k] = left_half[i];
+            ++i;
         } else {
-            arr[k] = M[j];
-            j++;
+            arr[k] = right_half[j];
+            ++j;
         }
-        k++;
     }
 
-    while (i < n1) {
-        arr[k] = L[i];
-        i++;
-        k++;
+    while (i < left_size) {
+        arr[k] = left_half[i];
+        ++i;
+        ++k;
     }
-  
-    while (j < n2) {
-        arr[k] = M[j];
-        j++;
-        k++;
+
+    while (j < right_size) {
+        arr[k] = right_half[j];
+        ++j;
+        ++k;
     }
 }
 
 void
-merge_sort_internal(int * arr, int l, int r)
+merge_sort_internal(int * arr, int left_bound, int right_bound)
 {
-    if (l < r) {
-        int m = l + (r - l) / 2;
-        merge_sort_internal(arr, l, m);
-        merge_sort_internal(arr, m + 1, r);
-        merge(arr, l, m, r);
-    }
+    if (left_bound >= right_bound)
+        return;
+
+    int mid = left_bound + (right_bound - left_bound) / 2;
+    merge_sort_internal(arr, left_bound, mid);
+    merge_sort_internal(arr, mid + 1, right_bound);
+    merge(arr, left_bound, mid, right_bound);
 }
 
 void
 merge_sort(int * arr, int size)
 {
-    merge_sort_internal(arr, 0, size);
+    merge_sort_internal(arr, 0, size - 1);
 }
 
 #endif // MERGE_SORT_H

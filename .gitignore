@@ -1,0 +1,6 @@
+.DS_Store
+benchmark
+results/
+table.png
+graph.png
+results.csv

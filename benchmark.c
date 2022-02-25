@@ -21,6 +21,7 @@ double results[N_SIZES][TIMES];
 void generate_arr();
 void print_arr();
 double average(double * arr, int size);
+void create_csv_header();
 void save_results(char * sort_name);
 void benchmark_sort();
 bool is_sorted();
@@ -28,15 +29,7 @@ bool is_sorted();
 int
 main(void)
 {
-    // Write header into csv
-    FILE * out_file = fopen("results.csv", "w");
-
-    fprintf(out_file, "Sort Name");
-    for (int i = 0; i < N_SIZES; ++i)
-        fprintf(out_file, ",%d", arr_sizes[i]);
-    fprintf(out_file, "\n");
-
-    fclose(out_file);
+    create_csv_header();
 
     // Benchmark all sorts
     benchmark_sort("Quick Sort", quick_sort);
@@ -45,6 +38,7 @@ main(void)
 
     return (EXIT_SUCCESS);
 }
+
 
 void
 generate_arr(int size)
@@ -77,13 +71,26 @@ benchmark_sort(char * sort_name, void sort())
             results[i][experiment] = time_spent;
 
             if (!is_sorted(arr_sizes[i])) {
-                printf("🚫 %s failed: Array was not sorted\n", sort_name);
+                printf("🚫 %s failed: array was not sorted\n", sort_name);
                 exit (EXIT_FAILURE);
             }
         }
     }
 
     save_results(sort_name);
+}
+
+void
+create_csv_header()
+{
+    FILE * out_file = fopen("results.csv", "w");
+
+    fprintf(out_file, "Sort Name");
+    for (int i = 0; i < N_SIZES; ++i)
+        fprintf(out_file, ",%d", arr_sizes[i]);
+    fprintf(out_file, "\n");
+
+    fclose(out_file);
 }
 
 void
